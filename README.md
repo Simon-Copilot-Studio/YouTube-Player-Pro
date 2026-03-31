@@ -1,7 +1,68 @@
-# Tauri + React + Typescript
+# YouTube Player Pro (Pro Max 專業版) 🚀
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+這是一款基於 **Tauri v2 + React 19** 打造的極致影音懸浮播放器，專為追求「極致隱蔽」與「頂級 UI/UX」的專業使用者設計。
 
-## Recommended IDE Setup
+## 🎬 核心功能亮點
 
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+### 1. 🛡️ 「老闆來了」偽裝模式 (Boss Key)
+這是本專案最強大的黑科技功能：
+*   **觸發機制**：連續快速敲擊 **`Esc` 鍵 2 次**。
+*   **視覺偽裝**：瞬間將播放畫面切換為高度擬真的 **Vite 開發者終端機 (Terminal)**，帶有即時捲動的程式碼日誌，讓人以為您正在努力偵錯。
+*   **無縫續播**：當危險解除，再次雙擊 `Esc` 即可瞬間切換回影片，且影片會自動從剛才中斷的地方 **0 延遲秒速恢復播放**。
+*   **絕對安全**：隱藏時影片會自動靜音並切換至 `display: none`，確保背景不會有任何畫面洩露。
+
+### 2. 🔲 自適應無邊框懸浮窗 (Frameless Glassmorphism)
+*   **智慧標題列 (Auto-Hide 2.0)**：標題列預設完全隱藏，打造沉浸式全屏感。滑鼠只要碰到 **視窗最頂端的 15px 感應區**，標題列就會自動向下滑入彈出。
+*   **原生視窗縮放**：支援多種比例（16:9, 9:16 Shorts, 21:9 等），視窗會依據影片比例自動調整大小，告別黑邊。
+*   **玻璃擬態 UI**：精美的半透明磨砂質感，支援透明度 (Transparency) 與亮度 (Brightness) 即時調整。
+
+### 3. 👆 類 Android 手勢操作 (Gesture Controls)
+*   **雙擊快進/倒退**：點擊影片左右測可實現 **±10 秒跳轉**，支援連續點擊累加跳轉時間，並帶有動態氣泡提示。
+*   **高質感進度條**：底部設有隱藏式 Indigo 漸層進度條，滑鼠靠近時會自動放大，支援精準點擊跳轉播放進度。
+*   **全能右鍵選單**：在畫面上點擊滑鼠右鍵，可快速呼叫「播放/暫停」、「老闆鍵」、「設定選單」等核心功能。
+
+### 4. 🧠 智慧狀態持久化 (Persistence)
+*   **記憶尺寸**：系統會自動記錄您上次關閉時的視窗大小與位置。
+*   **記憶偏好**：包含 URL、透明度、明暗度、字幕開關、播放速度等所有設定都會自動儲存，下次開啟即刻回到最愛狀態。
+
+---
+
+## ⌨️ 快捷鍵說明
+
+| 按鍵 | 功能 |
+| :--- | :--- |
+| **Esc (雙擊)** | **切換「老闆來了」偽裝模式 / 恢復播放** |
+| **Space** | 播放 / 暫停 |
+| **右鍵 (滑鼠)** | 呼叫快速控制選單 |
+| **滑鼠移至頂部** | 顯示標題列與功能選單按鈕 |
+
+---
+
+## 🛠️ 開發環境與安裝
+
+### 前置需求
+*   [Rust](https://www.rust-lang.org/) (Tauri 後端)
+*   [Node.js](https://nodejs.org/) (Vite 前端)
+
+### 快速啟動
+1.  **安裝依賴**
+    ```bash
+    npm install
+    ```
+2.  **啟動開發環境**
+    ```bash
+    npm run tauri dev
+    ```
+3.  **編譯正式發行版**
+    ```bash
+    npm run tauri build
+    ```
+
+---
+
+## 🔒 隱私與安全性
+本專案目前託管於 **GitHub 私人倉庫**，代碼僅限擁有者存取。內建的「老闆鍵」邏輯經過數次迭代，確保在切換過程中的隱密性最大化。
+
+---
+
+**YouTube Player Pro** - 讓您的觀影更自由，讓您的偵錯更真實。
