@@ -176,7 +176,8 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
       {/* Double-Click Seek Bubbles (Minimal Symbols) */}
       {seekOverlay && (
         <div className={`seek-bubble ${seekOverlay.side} active`}>
-          <div className="seek-text">{seekOverlay.side === 'right' ? '>>' : '<<'}</div>
+          <div className="seek-icon">{seekOverlay.side === 'right' ? '>>' : '<<'}</div>
+          <div className="seek-amount">{seekOverlay.amount}s</div>
         </div>
       )}
     </div>

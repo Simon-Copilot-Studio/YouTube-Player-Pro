@@ -328,9 +328,10 @@ input[type="range"]::-webkit-slider-thumb {
   position: absolute;
   top: 50%;
   transform: translateY(-50%) scale(0.8);
-  padding: 24px 34px;
+  width: 120px;
+  height: 120px;
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
   border-radius: 50%;
   color: white;
   pointer-events: none;
@@ -341,24 +342,33 @@ input[type="range"]::-webkit-slider-thumb {
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(255, 255, 255, 0.2);
-  z-index: 20;
+  z-index: 200;
+  box-shadow: 0 0 40px rgba(0,0,0,0.4);
 }
 
-.seek-bubble.left { left: 10%; border-top-right-radius: 100px; border-bottom-right-radius: 100px; }
-.seek-bubble.right { right: 10%; border-top-left-radius: 100px; border-bottom-left-radius: 100px; }
+.seek-bubble.left { left: 10%; }
+.seek-bubble.right { right: 10%; }
 
 .seek-bubble.active {
   opacity: 1;
   transform: translateY(-50%) scale(1);
 }
 
-.seek-text {
-  font-size: 28px;
+.seek-icon {
+  font-size: 32px;
   font-weight: 900;
-  letter-spacing: -2px;
-  text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-  font-family: 'Inter', sans-serif;
-  color: white;
+  line-height: 1;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
 }
+
+.seek-amount {
+  font-size: 14px;
+  font-weight: 800;
+  margin-top: 4px;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.9);
+  text-transform: uppercase;
+}
+
 
 
