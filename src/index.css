@@ -121,24 +121,24 @@ body {
 .sidebar-menu {
   position: fixed;
   top: 0;
-  right: -400px; /* Increased to completely hide shadow bleed */
+  left: -400px; /* Hidden on the LEFT */
   width: 320px;
   height: 100vh;
   background: rgba(0, 0, 0, var(--menu-bg-opacity));
   backdrop-filter: blur(var(--menu-blur));
   -webkit-backdrop-filter: blur(var(--menu-blur));
-  box-shadow: -15px 0 45px rgba(0, 0, 0, 0.7); /* Deep premium shadow */
-  transition: right 0.45s cubic-bezier(0.19, 1, 0.22, 1); /* Transition right property */
-  z-index: 5000; /* Above everything */
+  box-shadow: 15px 0 45px rgba(0, 0, 0, 0.7); /* Shadow projecting to the RIGHT */
+  transition: left 0.45s cubic-bezier(0.19, 1, 0.22, 1); /* Animating left */
+  z-index: 5000;
   padding: 40px 0;
   display: flex;
   flex-direction: column;
   color: white;
-  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-right: 1px solid rgba(255, 255, 255, 0.15); /* Border on the RIGHT */
 }
 
 .sidebar-menu.open { 
-  right: 0 !important; /* Move into view */
+  left: 0 !important; /* Slide into view on the LEFT */
 }
 
 .menu-inner-scroll {
