@@ -148,7 +148,7 @@ function App() {
         }}
       >
         {/* Render Layer: Hybrid Dispatcher (Player vs Universal vs Camouflage) */}
-        <div style={{ display: isCamouflaged ? 'none' : 'block', width: '100%', height: '100%' }}>
+        <div style={{ display: isCamouflaged ? 'none' : 'block', width: '100%', height: '100%', position: 'relative' }}>
           {engineType === 'youtube' && currentVideoId && (
             <Player 
               videoId={currentVideoId} 
