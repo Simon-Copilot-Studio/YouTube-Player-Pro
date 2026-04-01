@@ -20,6 +20,7 @@ function App() {
   const {
     transparency, setTransparency,
     brightness, setBrightness,
+    menuOpacity, setMenuOpacity,
     aspectRatio, setAspectRatio,
     showTitlebar, setShowTitlebar
   } = useWindowState();
@@ -34,8 +35,14 @@ function App() {
   const [playbackRate, setPlaybackRate] = useState<number>(1);
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [isCamouflaged, setIsCamouflaged] = useState<boolean>(false);
+  const [isNativeMode, setIsNativeMode] = useState<boolean>(false); // New Mode
   const [player, setPlayer] = useState<any>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null);
+
+  // Sync Menu Opacity to CSS Variable
+  useEffect(() => {
+    document.documentElement.style.setProperty('--menu-bg-opacity', (menuOpacity / 100).toString());
+  }, [menuOpacity]);
 
   // Persistence Sync
   useEffect(() => {
@@ -54,9 +61,14 @@ function App() {
     });
   }, [player]);
 
+  const toggleNativeMode = useCallback(() => {
+    setIsNativeMode(prev => !prev);
+  }, []);
+
   // 4. Keyboard Shortcuts Hook
   useKeyboardManager({
     toggleCamouflage,
+    toggleNativeMode,
     player,
     isCamouflaged,
     isMenuOpen,
@@ -119,8 +131,9 @@ function App() {
               videoId={currentVideoId} 
               onPlayerReady={setPlayer} 
               showSubtitles={showSubtitles} 
-              subtitleSize={100} // Refactored to constant for now
+              subtitleSize={100} 
               playbackRate={playbackRate}
+              isNativeMode={isNativeMode} // Passing new mode
             />
           )}
         </div>
@@ -135,11 +148,13 @@ function App() {
             url={url} setUrl={setUrl} 
             transparency={transparency} setTransparency={setTransparency}
             brightness={brightness} setBrightness={setBrightness} 
+            menuOpacity={menuOpacity} setMenuOpacity={setMenuOpacity} // New
             aspectRatio={aspectRatio} setAspectRatio={setAspectRatio}
             showSubtitles={showSubtitles} setShowSubtitles={setShowSubtitles} 
             subtitleSize={100} setSubtitleSize={() => {}} 
             playbackRate={playbackRate} setPlaybackRate={setPlaybackRate} 
             showTitlebar={showTitlebar} setShowTitlebar={setShowTitlebar}
+            isNativeMode={isNativeMode} setIsNativeMode={setIsNativeMode} // New
             onPlay={handlePlay} 
             onPause={() => player?.pauseVideo()} 
             onStop={() => player?.stopVideo()}

@@ -4,11 +4,13 @@ interface MenuProps {
   isOpen: boolean;
   onClose: () => void;
   url: string;
-  setUrl: (url: string) => void;
+  setUrl: (val: string) => void;
   transparency: number;
   setTransparency: (val: number) => void;
   brightness: number;
   setBrightness: (val: number) => void;
+  menuOpacity: number;
+  setMenuOpacity: (val: number) => void;
   aspectRatio: string;
   setAspectRatio: (val: string) => void;
   showSubtitles: boolean;
@@ -19,6 +21,8 @@ interface MenuProps {
   setPlaybackRate: (val: number) => void;
   showTitlebar: boolean;
   setShowTitlebar: (val: boolean) => void;
+  isNativeMode: boolean;
+  setIsNativeMode: (val: boolean) => void;
   onPlay: () => void;
   onPause: () => void;
   onStop: () => void;
@@ -29,11 +33,13 @@ export function Menu({
   url, setUrl,
   transparency, setTransparency,
   brightness, setBrightness,
+  menuOpacity, setMenuOpacity,
   aspectRatio, setAspectRatio,
   showSubtitles, setShowSubtitles,
   subtitleSize, setSubtitleSize,
   playbackRate, setPlaybackRate,
   showTitlebar, setShowTitlebar,
+  isNativeMode, setIsNativeMode,
   onPlay, onPause, onStop
 }: MenuProps) {
   
@@ -140,8 +146,29 @@ export function Menu({
               </div>
             </div>
 
-            <div className="setting-item">
-              <span className="setting-label">Display Ratio</span>
+            <div className="setting-row">
+              <span className="setting-label">Menu Opacity</span>
+              <input 
+                type="range" 
+                min="10" max="100" 
+                value={menuOpacity} 
+                onChange={(e) => setMenuOpacity(parseInt(e.target.value))} 
+              />
+              <span className="setting-value">{menuOpacity}%</span>
+            </div>
+
+            <div className="setting-row">
+              <span className="setting-label">Native Interaction</span>
+              <button 
+                className={`size-btn ${isNativeMode ? 'active' : ''}`}
+                onClick={() => setIsNativeMode(!isNativeMode)}
+              >
+                {isNativeMode ? 'ENABLED (G)' : 'DISABLED (G)'}
+              </button>
+            </div>
+
+            <div className="setting-row">
+              <span className="setting-label">Aspect Ratio</span>
               <div className="chip-group">
                 {ratios.map(r => (
                   <button 

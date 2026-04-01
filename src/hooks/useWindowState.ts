@@ -16,6 +16,7 @@ export function useWindowState() {
 
   const [transparency, setTransparency] = useState<number>(loadState("yt-transparency", 100));
   const [brightness, setBrightness] = useState<number>(loadState("yt-brightness", 100));
+  const [menuOpacity, setMenuOpacity] = useState<number>(loadState("yt-menu-opacity", 80));
   const [aspectRatio, setAspectRatio] = useState<string>(loadState("yt-aspect", "16 / 9"));
   const [showTitlebar, setShowTitlebar] = useState<boolean>(loadState("yt-titlebar", true));
   const isInitialLoad = useRef(true);
@@ -24,9 +25,10 @@ export function useWindowState() {
   useEffect(() => {
     localStorage.setItem("yt-transparency", JSON.stringify(transparency));
     localStorage.setItem("yt-brightness", JSON.stringify(brightness));
+    localStorage.setItem("yt-menu-opacity", JSON.stringify(menuOpacity));
     localStorage.setItem("yt-aspect", JSON.stringify(aspectRatio));
     localStorage.setItem("yt-titlebar", JSON.stringify(showTitlebar));
-  }, [transparency, brightness, aspectRatio, showTitlebar]);
+  }, [transparency, brightness, menuOpacity, aspectRatio, showTitlebar]);
 
   // Window size persistence & Auto-resize
   useEffect(() => {
@@ -68,6 +70,7 @@ export function useWindowState() {
   return {
     transparency, setTransparency,
     brightness, setBrightness,
+    menuOpacity, setMenuOpacity,
     aspectRatio, setAspectRatio,
     showTitlebar, setShowTitlebar
   };

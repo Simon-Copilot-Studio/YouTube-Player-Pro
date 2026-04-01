@@ -1,10 +1,21 @@
 :root {
-  font-family: 'Outfit', 'Inter', system-ui, sans-serif;
+  font-family: 'Inter', system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-  color-scheme: dark;
-  color: #f8fafc;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
   background-color: transparent;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  /* Black Glass Variables */
+  --menu-bg-opacity: 0.8;
+  --menu-blur: 16px;
+  --indigo-glow: 0 0 20px rgba(79, 70, 229, 0.4);
 }
 
 body {
@@ -36,12 +47,15 @@ body {
 /* Custom Context Menu */
 .custom-context-menu {
   position: fixed;
-  z-index: 5000;
-  min-width: 180px;
+  z-index: 2000;
+  background: rgba(0, 0, 0, var(--menu-bg-opacity));
+  backdrop-filter: blur(var(--menu-blur));
+  -webkit-backdrop-filter: blur(var(--menu-blur));
   border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   padding: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  min-width: 180px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   animation: contextIn 0.2s cubic-bezier(0, 0, 0.2, 1);
 }
 
@@ -57,16 +71,22 @@ body {
 
 /* Sidebar Menu - Pro Max Refactor */
 .sidebar-menu {
-  position: absolute;
-  top: 48px;
-  left: 0;
-  bottom: 0;
-  width: 380px; /* Increased width slightly */
-  z-index: 1500;
-  transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 20px 0 60px rgba(0, 0, 0, 0.6);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  position: fixed;
+  top: 0;
+  right: -320px;
+  width: 320px;
+  height: 100vh;
+  background: rgba(0, 0, 0, var(--menu-bg-opacity)); /* Controlled by variable */
+  backdrop-filter: blur(var(--menu-blur));
+  -webkit-backdrop-filter: blur(var(--menu-blur));
+  box-shadow: -10px 0 30px rgba(0, 0, 0, 0.5);
+  transition: right 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  z-index: 1001;
+  padding: 40px 24px;
+  display: flex;
+  flex-direction: column;
+  color: white;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .sidebar-menu.open { transform: translateX(0); }

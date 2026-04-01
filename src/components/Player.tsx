@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback, ReactMouseEvent, ReactTouchEvent } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 
 declare global {
   interface Window {
@@ -14,6 +14,7 @@ interface PlayerProps {
   subtitleSize: number;
   playbackRate: number;
   isCamouflaged?: boolean;
+  isNativeMode?: boolean;
 }
 
 interface SeekOverlayState {
@@ -26,7 +27,7 @@ interface SeekOverlayState {
  * YouTube Pro Player Component
  * Handles the heavy lifting of IFrame API and Gesture Interactions.
  */
-export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, isCamouflaged }: PlayerProps) {
+export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, isCamouflaged, isNativeMode }: PlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   
@@ -38,7 +39,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
   // Seek Interaction State
   const [seekOverlay, setSeekOverlay] = useState<SeekOverlayState | null>(null);
   const clickCounter = useRef<number>(0);
-  const clickTimer = useRef<NodeJS.Timeout | null>(null);
+  const clickTimer = useRef<any>(null); // Use any for cross-env compatibility
   const totalSeek = useRef<number>(0);
 
   // 1. YouTube API Initialization (Async Handling)
@@ -93,7 +94,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
   }, [playbackRate]);
 
   // 3. User Interaction Handlers (Gestures)
-  const handleProgressBarClick = (e: ReactMouseEvent) => {
+  const handleProgressBarClick = (e: React.MouseEvent) => {
     if (!playerRef.current) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -102,13 +103,13 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
     setCurrentTime(newTime);
   };
 
-  const handleInteraction = (e: ReactMouseEvent | ReactTouchEvent) => {
+  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
     if (isCamouflaged) return;
     e.preventDefault();
     e.stopPropagation();
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-    const x = ('clientX' in e ? e.clientX : (e as any).nativeEvent.touches[0].clientX) - rect.left;
+    const x = ('clientX' in e ? (e as React.MouseEvent).clientX : (e as React.TouchEvent).nativeEvent.touches[0].clientX) - rect.left;
     const side: 'left' | 'right' = x < rect.width / 2 ? 'left' : 'right';
 
     clickCounter.current += 1;
@@ -136,7 +137,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
     }
   };
 
-  const handleAuxClick = (e: ReactMouseEvent) => {
+  const handleAuxClick = (e: React.MouseEvent) => {
     if (isCamouflaged || !playerRef.current) return;
     if (e.button === 1) { // Middle Click
       e.preventDefault();
@@ -153,12 +154,21 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
       onMouseEnter={() => setIsHovering(true)} 
       onMouseLeave={() => setIsHovering(false)}
     >
-      <div ref={containerRef} style={{ width: "100%", height: "100%", pointerEvents: 'none' }}></div>
+      <div 
+        ref={containerRef} 
+        style={{ 
+          width: "100%", 
+          height: "100%", 
+          pointerEvents: isNativeMode ? 'auto' : 'none' // Allow click in Native Mode
+        }}
+      ></div>
       <div 
         className="seek-interaction-layer" 
         onClick={handleInteraction}
         onAuxClick={handleAuxClick}
-        style={{ pointerEvents: isCamouflaged ? 'none' : 'auto' }}
+        style={{ 
+          pointerEvents: (isCamouflaged || isNativeMode) ? 'none' : 'auto' // Disable gestures in Native Mode
+        }}
       ></div>
 
       {/* Indigo Progress Bar Layer */}

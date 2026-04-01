@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useRef } from "react";
+// No NodeJS namespace needed or use window.setTimeout
 import { getCurrentWindow } from "@tauri-apps/api/window";
 
 export interface ShortcutActions {
   toggleCamouflage: () => void;
+  toggleNativeMode: () => void;
   player: any;
   isCamouflaged: boolean;
   isMenuOpen: boolean;
@@ -13,6 +15,7 @@ export interface ShortcutActions {
 
 export function useKeyboardManager({
   toggleCamouflage,
+  toggleNativeMode,
   player,
   isCamouflaged,
   isMenuOpen,
@@ -31,10 +34,10 @@ export function useKeyboardManager({
       if (isMenuOpen) { setIsMenuOpen(false); return; }
       escapeCount.current += 1;
       if (escapeCount.current === 1) { 
-        escapeTimeout.current = setTimeout(() => { escapeCount.current = 0; }, 500); 
+        (window as any).escapeTimeout = window.setTimeout(() => { escapeCount.current = 0; }, 500); 
       }
       else if (escapeCount.current === 2) { 
-        if (escapeTimeout.current) clearTimeout(escapeTimeout.current); 
+        if ((window as any).escapeTimeout) window.clearTimeout((window as any).escapeTimeout); 
         escapeCount.current = 0; 
         toggleCamouflage(); 
       }
@@ -43,6 +46,12 @@ export function useKeyboardManager({
 
     // 2. Disable other keys if camouflaged
     if (isCamouflaged) return;
+
+    // 3. Native Mode Toggle (G)
+    if (key === 'g') {
+      toggleNativeMode();
+    }
+
 
     // 3. Transport Controls
     if (key === 'k' || key === ' ') {
