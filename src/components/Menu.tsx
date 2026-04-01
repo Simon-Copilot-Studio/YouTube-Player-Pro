@@ -61,7 +61,7 @@ export function Menu({
           <div className="menu-header">Pro Max Control</div>
           
           <div className="menu-section">
-            <div className="setting-item">
+            <div className="setting-field">
               <label className="setting-label">Source URL</label>
               <div className="url-group-modern">
                 <input 
@@ -90,28 +90,30 @@ export function Menu({
 
             <hr className="divider" />
 
-            <div className="toggle-row">
-              <div className="setting-item compact">
-                <span className="setting-label">Title Bar</span>
-                <button 
-                  className={`chip-item small ${showTitlebar ? 'active' : ''}`}
-                  onClick={() => setShowTitlebar(!showTitlebar)}
-                >
-                  {showTitlebar ? 'FIXED' : 'AUTO-HIDE'}
-                </button>
-              </div>
-              <div className="setting-item compact">
-                <span className="setting-label">Captions</span>
-                <button 
-                  className={`chip-item small ${showSubtitles ? 'active' : ''}`}
-                  onClick={() => setShowSubtitles(!showSubtitles)}
-                >
-                  {showSubtitles ? 'ENABLED' : 'DISABLED'}
-                </button>
+            <div className="setting-field">
+              <div className="toggle-row">
+                <div className="setting-field compact">
+                  <span className="setting-label">Title Bar</span>
+                  <button 
+                    className={`chip-item small ${showTitlebar ? 'active' : ''}`}
+                    onClick={() => setShowTitlebar(!showTitlebar)}
+                  >
+                    {showTitlebar ? 'FIXED' : 'AUTO-HIDE'}
+                  </button>
+                </div>
+                <div className="setting-field compact">
+                  <span className="setting-label">Captions</span>
+                  <button 
+                    className={`chip-item small ${showSubtitles ? 'active' : ''}`}
+                    onClick={() => setShowSubtitles(!showSubtitles)}
+                  >
+                    {showSubtitles ? 'ENABLED' : 'DISABLED'}
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div className="setting-item">
+            <div className="setting-field">
               <div className="setting-top">
                 <span className="setting-label">Transparency</span>
                 <span className="setting-value">{transparency}%</span>
@@ -121,7 +123,7 @@ export function Menu({
               </div>
             </div>
 
-            <div className="setting-item">
+            <div className="setting-field">
               <div className="setting-top">
                 <span className="setting-label">Brightness</span>
                 <span className="setting-value">{brightness}%</span>
@@ -131,7 +133,22 @@ export function Menu({
               </div>
             </div>
 
-            <div className="setting-item">
+            <div className="setting-field">
+              <div className="setting-top">
+                <span className="setting-label">Menu Opacity</span>
+                <span className="setting-value">{menuOpacity}%</span>
+              </div>
+              <div className="slider-container-pro">
+                <input 
+                  type="range" 
+                  min="10" max="100" 
+                  value={menuOpacity} 
+                  onChange={(e) => setMenuOpacity(parseInt(e.target.value))} 
+                />
+              </div>
+            </div>
+
+            <div className="setting-field">
               <span className="setting-label">Playback Performance</span>
               <div className="chip-group">
                 {speeds.map(s => (
@@ -146,28 +163,21 @@ export function Menu({
               </div>
             </div>
 
-            <div className="setting-row">
-              <span className="setting-label">Menu Opacity</span>
-              <input 
-                type="range" 
-                min="10" max="100" 
-                value={menuOpacity} 
-                onChange={(e) => setMenuOpacity(parseInt(e.target.value))} 
-              />
-              <span className="setting-value">{menuOpacity}%</span>
-            </div>
-
-            <div className="setting-row">
-              <span className="setting-label">Native Interaction</span>
+            <div className="setting-field">
+              <div className="setting-top">
+                <span className="setting-label">Native Interaction</span>
+                <span className="setting-value">{isNativeMode ? 'G ON' : 'G OFF'}</span>
+              </div>
               <button 
-                className={`size-btn ${isNativeMode ? 'active' : ''}`}
+                className={`chip-item ${isNativeMode ? 'active' : ''}`}
+                style={{ width: '100%', marginTop: '4px' }}
                 onClick={() => setIsNativeMode(!isNativeMode)}
               >
-                {isNativeMode ? 'ENABLED (G)' : 'DISABLED (G)'}
+                {isNativeMode ? 'NATIVE MODE ENABLED' : 'QUICK GESTURES ACTIVE'}
               </button>
             </div>
 
-            <div className="setting-row">
+            <div className="setting-field">
               <span className="setting-label">Aspect Ratio</span>
               <div className="chip-group">
                 {ratios.map(r => (
@@ -183,7 +193,7 @@ export function Menu({
             </div>
 
             {showSubtitles && (
-              <div className="setting-item">
+              <div className="setting-field">
                 <span className="setting-label">Subtitle Scale</span>
                 <div className="chip-group">
                   {subSizes.map(size => (
