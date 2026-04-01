@@ -356,12 +356,8 @@ input[type="range"]::-webkit-slider-thumb {
   font-size: 42px; /* Extra large for icons */
   font-weight: 950;
   line-height: 1;
-  /* Thick White Glow for black icon visibility */
+  /* Soft White Glow only - Removed hard outline */
   text-shadow: 
-    -2px -2px 0 #fff,  
-     2px -2px 0 #fff,
-    -2px  2px 0 #fff,
-     2px  2px 0 #fff,
      0 0 15px #fff,
      0 0 25px rgba(255, 255, 255, 0.8);
 }
@@ -372,14 +368,11 @@ input[type="range"]::-webkit-slider-thumb {
   margin-top: 2px;
   letter-spacing: 0.05em;
   color: #000;
-  /* Thick White Glow for black text visibility */
+  /* Soft White Glow only - Removed hard outline */
   text-shadow: 
-    -1px -1px 0 #fff,  
-     1px -1px 0 #fff,
-    -1px  1px 0 #fff,
-     1px  1px 0 #fff,
      0 0 10px #fff;
 }
+
 
 
 
