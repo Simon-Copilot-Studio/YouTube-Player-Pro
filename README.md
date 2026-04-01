@@ -2,6 +2,16 @@
 
 這是一款基於 **Tauri v2 + React 19** 打造的極致影音懸浮播放器，專為追求「極致隱蔽」與「頂級 UI/UX」的專業使用者設計。
 
+---
+
+## 📥 下載與安裝 (Downloads)
+如果您是測試使用者，請前往 [**GitHub Releases**](https://github.com/Simon-Copilot-Studio/YouTube-Player-Pro/releases) 下載最新版本：
+*   **`.msi`**：適合 Windows 穩定安裝。
+*   **`.exe`**：免安裝版，解壓即用。
+
+---
+
+
 ## 🎬 核心功能亮點
 
 ### 1. 🛡️ 「老闆來了」偽裝模式 (Boss Key)
