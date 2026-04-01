@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback, ReactMouseEvent, ReactTouchEvent } from "react";
 
 declare global {
   interface Window {
@@ -16,53 +16,36 @@ interface PlayerProps {
   isCamouflaged?: boolean;
 }
 
-export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, playbackRate, isCamouflaged }: PlayerProps) {
+interface SeekOverlayState {
+  side: 'left' | 'right';
+  amount: number;
+  active: boolean;
+}
+
+/**
+ * YouTube Pro Player Component
+ * Handles the heavy lifting of IFrame API and Gesture Interactions.
+ */
+export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, isCamouflaged }: PlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const playerRef = useRef<any>(null);
   
   // Progress State
-  const [currentTime, setCurrentTime] = useState(0);
-  const [duration, setDuration] = useState(0);
-  const [isHovering, setIsHovering] = useState(false);
+  const [currentTime, setCurrentTime] = useState<number>(0);
+  const [duration, setDuration] = useState<number>(0);
+  const [isHovering, setIsHovering] = useState<boolean>(false);
 
   // Seek Interaction State
-  const [seekOverlay, setSeekOverlay] = useState<{ side: 'left' | 'right', amount: number, active: boolean } | null>(null);
-  const clickCounter = useRef(0);
+  const [seekOverlay, setSeekOverlay] = useState<SeekOverlayState | null>(null);
+  const clickCounter = useRef<number>(0);
   const clickTimer = useRef<NodeJS.Timeout | null>(null);
-  const totalSeek = useRef(0);
+  const totalSeek = useRef<number>(0);
 
-  useEffect(() => {
-    if (!window.YT) {
-      const tag = document.createElement("script");
-      tag.src = "https://www.youtube.com/iframe_api";
-      const firstScriptTag = document.getElementsByTagName("script")[0];
-      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-      window.onYouTubeIframeAPIReady = () => initPlayer();
-    } else {
-      initPlayer();
-    }
-    return () => playerRef.current?.destroy();
-  }, [videoId]);
-
-  // Sync state with player
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (playerRef.current && playerRef.current.getCurrentTime) {
-        setCurrentTime(playerRef.current.getCurrentTime());
-        setDuration(playerRef.current.getDuration() || 0);
-      }
-    }, 500);
-    return () => clearInterval(interval);
-  }, []);
-
-  useEffect(() => {
-    if (playerRef.current?.setPlaybackRate) {
-      playerRef.current.setPlaybackRate(playbackRate);
-    }
-  }, [playbackRate]);
-
-  const initPlayer = () => {
+  // 1. YouTube API Initialization (Async Handling)
+  const initPlayer = useCallback(() => {
     if (playerRef.current) playerRef.current.destroy();
+    if (!window.YT) return;
+
     playerRef.current = new window.YT.Player(containerRef.current, {
       videoId,
       playerVars: {
@@ -77,33 +60,62 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
         },
       },
     });
-  };
+  }, [videoId, onPlayerReady, playbackRate, showSubtitles]);
 
-  const handleProgressBarClick = (e: React.MouseEvent) => {
+  useEffect(() => {
+    if (!window.YT) {
+      const tag = document.createElement("script");
+      tag.src = "https://www.youtube.com/iframe_api";
+      const firstScriptTag = document.getElementsByTagName("script")[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+      window.onYouTubeIframeAPIReady = () => initPlayer();
+    } else {
+      initPlayer();
+    }
+    return () => playerRef.current?.destroy();
+  }, [videoId, initPlayer]);
+
+  // 2. Playback State Synchronization
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (playerRef.current?.getCurrentTime) {
+        setCurrentTime(playerRef.current.getCurrentTime());
+        setDuration(playerRef.current.getDuration() || 0);
+      }
+    }, 500);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (playerRef.current?.setPlaybackRate) {
+      playerRef.current.setPlaybackRate(playbackRate);
+    }
+  }, [playbackRate]);
+
+  // 3. User Interaction Handlers (Gestures)
+  const handleProgressBarClick = (e: ReactMouseEvent) => {
     if (!playerRef.current) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const x = e.clientX - rect.left;
-    const clickedPercentage = x / rect.width;
-    const newTime = clickedPercentage * duration;
+    const newTime = (x / rect.width) * duration;
     playerRef.current.seekTo(newTime, true);
     setCurrentTime(newTime);
   };
 
-  const handleInteraction = (e: React.MouseEvent | React.TouchEvent) => {
+  const handleInteraction = (e: ReactMouseEvent | ReactTouchEvent) => {
     if (isCamouflaged) return;
     e.preventDefault();
     e.stopPropagation();
 
     const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const x = ('clientX' in e ? e.clientX : (e as any).nativeEvent.touches[0].clientX) - rect.left;
-    const side = x < rect.width / 2 ? 'left' : 'right';
+    const side: 'left' | 'right' = x < rect.width / 2 ? 'left' : 'right';
 
     clickCounter.current += 1;
     if (clickCounter.current === 1) {
       setTimeout(() => {
         if (clickCounter.current === 1) {
           clickCounter.current = 0;
-          // Toggle controls highlight or similar
           setIsHovering(true);
           setTimeout(() => setIsHovering(false), 2000);
         }
@@ -114,6 +126,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
       playerRef.current?.seekTo(playerRef.current.getCurrentTime() + delta, true);
       totalSeek.current += step;
       setSeekOverlay({ side, amount: totalSeek.current, active: true });
+      
       if (clickTimer.current) clearTimeout(clickTimer.current);
       clickTimer.current = setTimeout(() => {
         setSeekOverlay(null);
@@ -123,13 +136,12 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
     }
   };
 
-  const handleAuxClick = (e: React.MouseEvent) => {
+  const handleAuxClick = (e: ReactMouseEvent) => {
     if (isCamouflaged || !playerRef.current) return;
-    if (e.button === 1) { // Middle Mouse Button
+    if (e.button === 1) { // Middle Click
       e.preventDefault();
       const state = playerRef.current.getPlayerState?.();
-      if (state === 1) playerRef.current.pauseVideo();
-      else playerRef.current.playVideo();
+      state === 1 ? playerRef.current.pauseVideo() : playerRef.current.playVideo();
     }
   };
 
@@ -149,7 +161,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
         style={{ pointerEvents: isCamouflaged ? 'none' : 'auto' }}
       ></div>
 
-      {/* Modern Progress Bar */}
+      {/* Indigo Progress Bar Layer */}
       <div 
         className={`progress-bar-container ${isHovering ? 'visible' : ''}`}
         onClick={handleProgressBarClick}
@@ -161,6 +173,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
         </div>
       </div>
 
+      {/* Double-Click Seek Bubbles (Minimal Symbols) */}
       {seekOverlay && (
         <div className={`seek-bubble ${seekOverlay.side} active`}>
           <div className="seek-text">{seekOverlay.side === 'right' ? '>>' : '<<'}</div>

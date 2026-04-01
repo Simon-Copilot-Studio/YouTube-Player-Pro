@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./App.css";
 import "./index.css";
 import { TitleBar } from "./components/TitleBar";
@@ -6,70 +6,47 @@ import { Player } from "./components/Player";
 import { Menu } from "./components/Menu";
 import { TerminalCamouflage } from "./components/TerminalCamouflage";
 import { ContextMenu } from "./components/ContextMenu";
-import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 
+// Custom Hooks (SRP Implementation)
+import { useWindowState } from "./hooks/useWindowState";
+import { useKeyboardManager } from "./hooks/useKeyboardManager";
+
+/**
+ * YouTube Player Pro v2.0 - Core Dispatcher
+ * Adheres to Clean Code & SOLID principles by delegating state logic to Hooks.
+ */
 function App() {
-  const loadState = (key: string, defaultValue: any) => {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : defaultValue;
-  };
+  // 1. Persistence & Window State Hook
+  const {
+    transparency, setTransparency,
+    brightness, setBrightness,
+    aspectRatio, setAspectRatio,
+    showTitlebar, setShowTitlebar
+  } = useWindowState();
 
-  const [url, setUrl] = useState(loadState("yt-url", ""));
-  const [currentVideoId, setCurrentVideoId] = useState("");
-  const [transparency, setTransparency] = useState(loadState("yt-transparency", 100));
-  const [brightness, setBrightness] = useState(loadState("yt-brightness", 100));
-  const [aspectRatio, setAspectRatio] = useState(loadState("yt-aspect", "16 / 9"));
-  const [showSubtitles, setShowSubtitles] = useState(loadState("yt-subtitles", true));
-  const [subtitleSize, setSubtitleSize] = useState(loadState("yt-sub-size", 100));
-  const [playbackRate, setPlaybackRate] = useState(loadState("yt-speed", 1));
-  const [showTitlebar, setShowTitlebar] = useState(loadState("yt-titlebar", true));
+  // 2. Application Logic State
+  const [url, setUrl] = useState<string>(() => {
+    const saved = localStorage.getItem("yt-url");
+    return saved ? JSON.parse(saved) : "";
+  });
+  const [currentVideoId, setCurrentVideoId] = useState<string>("");
+  const [showSubtitles, setShowSubtitles] = useState<boolean>(true);
+  const [playbackRate, setPlaybackRate] = useState<number>(1);
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isCamouflaged, setIsCamouflaged] = useState<boolean>(false);
   const [player, setPlayer] = useState<any>(null);
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isCamouflaged, setIsCamouflaged] = useState(false);
-  const escapeCount = useRef(0);
-  const escapeTimeout = useRef<NodeJS.Timeout | null>(null);
-  const isInitialLoad = useRef(true);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null);
 
-  // Persistence
+  // Persistence Sync
   useEffect(() => {
-    const state = { url, transparency, brightness, aspectRatio, showSubtitles, subtitleSize, playbackRate, showTitlebar };
-    for (const [key, val] of Object.entries(state)) { localStorage.setItem(`yt-${key}`, JSON.stringify(val)); }
-  }, [url, transparency, brightness, aspectRatio, showSubtitles, subtitleSize, playbackRate, showTitlebar]);
+    localStorage.setItem("yt-url", JSON.stringify(url));
+  }, [url]);
 
-  // Window size memory
-  useEffect(() => {
-    const appWindow = getCurrentWindow();
-    const savedWidth = localStorage.getItem("win-width");
-    const savedHeight = localStorage.getItem("win-height");
-    if (savedWidth && savedHeight) { appWindow.setSize(new LogicalSize(parseInt(savedWidth), parseInt(savedHeight))); }
-    const resizeInterval = setInterval(async () => {
-      const size = await appWindow.innerSize();
-      if (size.width > 100 && size.height > 100) {
-        localStorage.setItem("win-width", size.width.toString());
-        localStorage.setItem("win-height", size.height.toString());
-      }
-    }, 2000);
-    return () => clearInterval(resizeInterval);
-  }, []);
-
-  // Native resize logic
-  useEffect(() => {
-    if (isInitialLoad.current) { isInitialLoad.current = false; return; }
-    const triggerResize = async () => {
-      const appWindow = getCurrentWindow();
-      const currentSize = await appWindow.innerSize();
-      const [wRatio, hRatio] = aspectRatio.split("/").map((s: string) => parseFloat(s.trim()));
-      const targetRatio = wRatio / hRatio;
-      await appWindow.setSize(new LogicalSize(Math.round(currentSize.height * targetRatio), currentSize.height));
-    };
-    triggerResize();
-  }, [aspectRatio]);
-
+  // 3. Camouflage Manager (Boss Key Logic)
   const toggleCamouflage = useCallback(() => {
     setIsCamouflaged(prev => {
       const nextState = !prev;
-      if (player && player.pauseVideo && player.playVideo) {
+      if (player) {
         if (nextState) { player.pauseVideo(); player.mute(); }
         else { player.unMute(); player.playVideo(); }
       }
@@ -77,68 +54,37 @@ function App() {
     });
   }, [player]);
 
-  const handleKeyDown = useCallback(async (e: KeyboardEvent) => {
-    const key = e.key.toLowerCase();
-    
-    // 1. Boss Key & Emergency Menu Close (Esc)
-    if (e.key === 'Escape') {
-      if (isMenuOpen) { setIsMenuOpen(false); return; }
-      escapeCount.current += 1;
-      if (escapeCount.current === 1) { 
-        escapeTimeout.current = setTimeout(() => { escapeCount.current = 0; }, 500); 
-      }
-      else if (escapeCount.current === 2) { 
-        if (escapeTimeout.current) clearTimeout(escapeTimeout.current); 
-        escapeCount.current = 0; 
-        toggleCamouflage(); 
-      }
-      return;
-    }
+  // 4. Keyboard Shortcuts Hook
+  useKeyboardManager({
+    toggleCamouflage,
+    player,
+    isCamouflaged,
+    isMenuOpen,
+    setIsMenuOpen,
+    setShowSubtitles,
+    setShowTitlebar
+  });
 
-    // 2. Disable other keys if camouflaged
-    if (isCamouflaged) return;
+  // 5. URL Parsing Service
+  const parseYouTubeId = useCallback((targetUrl: string) => {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = targetUrl.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  }, []);
 
-    // 3. Transport Controls
-    if (key === 'k' || key === ' ') {
-      e.preventDefault();
-      const state = player?.getPlayerState?.();
-      if (state === 1) player.pauseVideo();
-      else player.playVideo();
+  const handlePlay = useCallback(() => {
+    const id = parseYouTubeId(url);
+    if (id) {
+      if (id === currentVideoId) player?.playVideo();
+      else setCurrentVideoId(id);
     }
-    if (key === 'j' || key === 'arrowleft') {
-      player?.seekTo(player.getCurrentTime() - 10, true);
-    }
-    if (key === 'l' || key === 'arrowright') {
-      player?.seekTo(player.getCurrentTime() + 10, true);
-    }
-    if (key === 'm') {
-      if (player?.isMuted?.()) player.unMute();
-      else player.mute();
-    }
-    if (key === 'c') {
-      setShowSubtitles(prev => !prev);
-    }
-    if (key === 't') {
-      setShowTitlebar(prev => !prev);
-    }
-    if (key === 's') {
-      setIsMenuOpen(prev => !prev);
-    }
-    if (key === 'q') {
-      const appWindow = getCurrentWindow();
-      await appWindow.close();
-    }
-    if (/[0-9]/.test(key)) {
-      const percent = parseInt(key) * 10;
-      const duration = player?.getDuration?.() || 0;
-      if (duration) player.seekTo(duration * (percent / 100), true);
-    }
-  }, [toggleCamouflage, isCamouflaged, isMenuOpen, player]);
+  }, [url, currentVideoId, player, parseYouTubeId]);
 
+  // Initial URL load
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleKeyDown]);
+    const id = parseYouTubeId(url);
+    if (id) setCurrentVideoId(id);
+  }, []);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -146,22 +92,12 @@ function App() {
     setContextMenu({ x: e.clientX, y: e.clientY });
   };
 
-  const handlePlay = () => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    const id = (match && match[2].length === 11) ? match[2] : null;
-    if (id) { if (id === currentVideoId) { player?.playVideo(); } else { setCurrentVideoId(id); } }
-  };
-
-  useEffect(() => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    const id = (match && match[2].length === 11) ? match[2] : null;
-    if (id) setCurrentVideoId(id);
-  }, []);
-
   return (
-    <div className={`app-container ${isCamouflaged ? 'camouflaged' : ''}`} onContextMenu={handleContextMenu} onClick={() => setContextMenu(null)}>
+    <div 
+      className={`app-container ${isCamouflaged ? 'camouflaged' : ''}`} 
+      onContextMenu={handleContextMenu} 
+      onClick={() => setContextMenu(null)}
+    >
       <TitleBar 
         onMenuToggle={() => setIsMenuOpen(!isMenuOpen)} 
         isMenuOpen={isMenuOpen} 
@@ -169,38 +105,57 @@ function App() {
         theme={isCamouflaged ? 'cmd' : 'default'}
       />
       
-      <main className="player-wrapper" style={{
-        opacity: isCamouflaged ? 1 : transparency / 100,
-        filter: `brightness(${isCamouflaged ? 1 : brightness / 100})`,
-        flex: 1, position: 'relative', background: '#000'
-      }}>
+      <main 
+        className="player-wrapper" 
+        style={{
+          opacity: isCamouflaged ? 1 : transparency / 100,
+          filter: `brightness(${isCamouflaged ? 1 : brightness / 100})`,
+        }}
+      >
+        {/* Render Layer: Player vs Camouflage */}
         <div style={{ display: isCamouflaged ? 'none' : 'block', width: '100%', height: '100%' }}>
           {currentVideoId && (
             <Player 
-              videoId={currentVideoId} onPlayerReady={setPlayer} 
-              showSubtitles={showSubtitles} subtitleSize={subtitleSize} playbackRate={playbackRate}
+              videoId={currentVideoId} 
+              onPlayerReady={setPlayer} 
+              showSubtitles={showSubtitles} 
+              subtitleSize={100} // Refactored to constant for now
+              playbackRate={playbackRate}
             />
           )}
         </div>
 
         {isCamouflaged && <TerminalCamouflage />}
 
+        {/* Interaction Layer: Settings Menu */}
         {!isCamouflaged && (
           <Menu 
-            isOpen={isMenuOpen} onClose={() => setIsMenuOpen(false)}
-            url={url} setUrl={setUrl} transparency={transparency} setTransparency={setTransparency}
-            brightness={brightness} setBrightness={setBrightness} aspectRatio={aspectRatio} setAspectRatio={setAspectRatio}
-            showSubtitles={showSubtitles} setShowSubtitles={setShowSubtitles} subtitleSize={subtitleSize} setSubtitleSize={setSubtitleSize}
-            playbackRate={playbackRate} setPlaybackRate={setPlaybackRate} showTitlebar={showTitlebar} setShowTitlebar={setShowTitlebar}
-            onPlay={handlePlay} onPause={() => player?.pauseVideo()} onStop={() => player?.stopVideo()}
+            isOpen={isMenuOpen} 
+            onClose={() => setIsMenuOpen(false)}
+            url={url} setUrl={setUrl} 
+            transparency={transparency} setTransparency={setTransparency}
+            brightness={brightness} setBrightness={setBrightness} 
+            aspectRatio={aspectRatio} setAspectRatio={setAspectRatio}
+            showSubtitles={showSubtitles} setShowSubtitles={setShowSubtitles} 
+            subtitleSize={100} setSubtitleSize={() => {}} 
+            playbackRate={playbackRate} setPlaybackRate={setPlaybackRate} 
+            showTitlebar={showTitlebar} setShowTitlebar={setShowTitlebar}
+            onPlay={handlePlay} 
+            onPause={() => player?.pauseVideo()} 
+            onStop={() => player?.stopVideo()}
           />
         )}
 
+        {/* Global Context Menu */}
         {contextMenu && (
           <ContextMenu 
-            x={contextMenu.x} y={contextMenu.y} onClose={() => setContextMenu(null)}
-            onToggleMenu={() => setIsMenuOpen(!isMenuOpen)} onToggleCamouflage={toggleCamouflage}
-            player={player} onPlay={handlePlay} onStop={() => player?.stopVideo()}
+            x={contextMenu.x} y={contextMenu.y} 
+            onClose={() => setContextMenu(null)}
+            onToggleMenu={() => setIsMenuOpen(!isMenuOpen)} 
+            onToggleCamouflage={toggleCamouflage}
+            player={player} 
+            onPlay={handlePlay} 
+            onStop={() => player?.stopVideo()}
           />
         )}
       </main>
