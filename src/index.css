@@ -315,3 +315,47 @@ input[type="range"]::-webkit-slider-thumb {
 
 .player-wrapper { flex: 1; position: relative; background: #000; display: flex; justify-content: center; align-items: center; overflow: hidden; width: 100%; height: 100%; }
 .aspect-wrapper { width: 100%; height: 100%; position: relative; display: flex; justify-content: center; align-items: center; }
+
+/* Seek Interaction & Gestures (PRO MAX) */
+.seek-interaction-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  cursor: pointer;
+}
+
+.seek-bubble {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%) scale(0.8);
+  padding: 24px 34px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(12px);
+  border-radius: 50%;
+  color: white;
+  pointer-events: none;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  z-index: 20;
+}
+
+.seek-bubble.left { left: 10%; border-top-right-radius: 100px; border-bottom-right-radius: 100px; }
+.seek-bubble.right { right: 10%; border-top-left-radius: 100px; border-bottom-left-radius: 100px; }
+
+.seek-bubble.active {
+  opacity: 1;
+  transform: translateY(-50%) scale(1);
+}
+
+.seek-text {
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+

@@ -134,7 +134,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
       <div ref={containerRef} style={{ width: "100%", height: "100%", pointerEvents: 'none' }}></div>
       <div 
         className="seek-interaction-layer" 
-        onMouseDown={handleInteraction}
+        onClick={handleInteraction}
         style={{ pointerEvents: isCamouflaged ? 'none' : 'auto' }}
       ></div>
 
