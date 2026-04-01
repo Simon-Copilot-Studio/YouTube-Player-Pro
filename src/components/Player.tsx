@@ -123,6 +123,16 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
     }
   };
 
+  const handleAuxClick = (e: React.MouseEvent) => {
+    if (isCamouflaged || !playerRef.current) return;
+    if (e.button === 1) { // Middle Mouse Button
+      e.preventDefault();
+      const state = playerRef.current.getPlayerState?.();
+      if (state === 1) playerRef.current.pauseVideo();
+      else playerRef.current.playVideo();
+    }
+  };
+
   const progressPercentage = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
@@ -135,6 +145,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
       <div 
         className="seek-interaction-layer" 
         onClick={handleInteraction}
+        onAuxClick={handleAuxClick}
         style={{ pointerEvents: isCamouflaged ? 'none' : 'auto' }}
       ></div>
 
