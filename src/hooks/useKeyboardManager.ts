@@ -24,7 +24,7 @@ export function useKeyboardManager({
   setShowTitlebar
 }: ShortcutActions) {
   const escapeCount = useRef(0);
-  const escapeTimeout = useRef<NodeJS.Timeout | null>(null);
+
 
   const handleKeyDown = useCallback(async (e: KeyboardEvent) => {
     const key = e.key.toLowerCase();

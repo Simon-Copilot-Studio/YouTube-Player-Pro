@@ -7,7 +7,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 export function TerminalCamouflage() {
   const [logs, setLogs] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
-  const logQueue = useRef<string[]>([]);
+
   const MAX_LOGS = 100; // Persistence Safety
 
   const generateLog = useCallback(() => {

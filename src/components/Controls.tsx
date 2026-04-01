@@ -26,7 +26,7 @@ export function Controls({
   subtitleSize, setSubtitleSize,
   onPlay, onStop
 }: ControlsProps) {
-  const [expanded, setExpanded] = useState(false);
+  const [expanded] = useState(false);
 
   return (
     <div className={`controls-overlay glass ${expanded ? 'expanded' : ''}`}>
