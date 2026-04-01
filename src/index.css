@@ -295,7 +295,41 @@ input[type="range"]::-webkit-slider-thumb {
 /* Other UI Helpers */
 .menu-header { font-size: 26px; font-weight: 900; margin-bottom: 32px; background: linear-gradient(to right, #818cf8, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
 .divider { border: none; border-top: 1px solid rgba(255, 255, 255, 0.05); margin: 8px 0; }
-.modern-input { background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.1); padding: 16px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box; font-family: inherit; font-size: 14px; }
+.modern-input { background: #0f172a; border: 1px solid rgba(255, 255, 255, 0.1); padding: 16px; border-radius: 12px; color: white; width: 100%; box-sizing: border-box; font-family: inherit; font-size: 14px; transition: border-color 0.2s; }
+.modern-input:focus { border-color: #818cf8; outline: none; }
+
+/* Clear Button Specific Styles */
+.url-input-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.url-input-wrapper .modern-input {
+  padding-right: 42px; /* Breathing room for the X icon */
+}
+
+.input-clear-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  padding: 4px;
+  border-radius: 50%;
+}
+
+.input-clear-btn:hover {
+  color: #818cf8;
+  background: rgba(129, 140, 248, 0.1);
+  transform: translateY(-50%) scale(1.1);
+}
 .click-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.4); z-index: 1400; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
 .click-overlay.active { opacity: 1; pointer-events: auto; }
 

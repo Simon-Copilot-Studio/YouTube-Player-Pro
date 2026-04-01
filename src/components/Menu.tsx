@@ -63,7 +63,7 @@ export function Menu({
           <div className="menu-section">
             <div className="setting-field">
               <label className="setting-label">Source URL</label>
-              <div className="url-group-modern">
+              <div className="url-input-wrapper">
                 <input 
                   className="modern-input"
                   type="text" 
@@ -71,6 +71,16 @@ export function Menu({
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                 />
+                {url && (
+                  <button className="input-clear-btn" onClick={() => setUrl("")} title="Clear URL">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  </button>
+                )}
+              </div>
+              <div className="url-group-modern">
                 <div className="action-grid-three">
                   <button className="action-card play" onClick={() => { onPlay(); onClose(); }}>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
