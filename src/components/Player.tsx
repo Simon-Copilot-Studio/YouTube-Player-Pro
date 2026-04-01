@@ -152,7 +152,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, subtitleSize, pl
 
       {seekOverlay && (
         <div className={`seek-bubble ${seekOverlay.side} active`}>
-          <div className="seek-text">{seekOverlay.amount} SECONDS</div>
+          <div className="seek-text">{seekOverlay.side === 'right' ? '>>' : '<<'}</div>
         </div>
       )}
     </div>
