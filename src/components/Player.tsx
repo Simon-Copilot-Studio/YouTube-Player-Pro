@@ -1,15 +1,9 @@
 import React, { useEffect, useRef, useState, useCallback } from "react";
-
-declare global {
-  interface Window {
-    onYouTubeIframeAPIReady: () => void;
-    YT: any;
-  }
-}
+import { YT } from "../types/youtube";
 
 interface PlayerProps {
   videoId: string;
-  onPlayerReady?: (player: any) => void;
+  onPlayerReady?: (player: YT.Player) => void;
   showSubtitles: boolean;
   subtitleSize: number;
   playbackRate: number;
@@ -29,7 +23,7 @@ interface SeekOverlayState {
  */
 export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, isCamouflaged, isNativeMode }: PlayerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const playerRef = useRef<any>(null);
+  const playerRef = useRef<YT.Player | null>(null);
   
   // Progress State
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -39,7 +33,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
   // Seek Interaction State
   const [seekOverlay, setSeekOverlay] = useState<SeekOverlayState | null>(null);
   const clickCounter = useRef<number>(0);
-  const clickTimer = useRef<any>(null); // Use any for cross-env compatibility
+  const clickTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const totalSeek = useRef<number>(0);
 
   // 1. YouTube API Initialization (Async Handling)
@@ -55,7 +49,7 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
         cc_lang_pref: "en",
       },
       events: {
-        onReady: (event: any) => {
+        onReady: (event: { target: YT.Player }) => {
           // Dynamic setting without needing to re-init
           event.target.setPlaybackRate(playbackRate);
           onPlayerReady?.(event.target);

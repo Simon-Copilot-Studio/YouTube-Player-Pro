@@ -43,15 +43,21 @@ export function useWindowState() {
     };
     initSize();
 
-    const resizeInterval = setInterval(async () => {
-      const size = await appWindow.innerSize();
-      if (size.width > 100 && size.height > 100) {
-        localStorage.setItem("win-width", size.width.toString());
-        localStorage.setItem("win-height", size.height.toString());
-      }
-    }, 2000);
+    // Window size persistence - Event Driven (Pro Max 4.1 Optimizer)
+    let unlisten: (() => void) | undefined;
+    const setupListener = async () => {
+      unlisten = await appWindow.onResized(({ payload: size }) => {
+        if (size.width > 100 && size.height > 100) {
+          localStorage.setItem("win-width", size.width.toString());
+          localStorage.setItem("win-height", size.height.toString());
+        }
+      });
+    };
+    setupListener();
 
-    return () => clearInterval(resizeInterval);
+    return () => {
+      if (unlisten) unlisten();
+    };
   }, []);
 
   // Handle Aspect Ratio changes

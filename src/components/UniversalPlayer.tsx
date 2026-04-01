@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Webview } from "@tauri-apps/api/webview";
-import { getCurrentWindow } from "@tauri-apps/api/window";
+import { getCurrentWindow, LogicalSize, LogicalPosition } from "@tauri-apps/api/window";
 
 interface UniversalPlayerProps {
   url: string;
@@ -64,10 +64,37 @@ export function UniversalPlayer({ url, isCamouflaged }: UniversalPlayerProps) {
     };
   }, [isCamouflaged]); // Listen only to camouflage to toggle visibility fast
 
-  // Re-create when URL changes
+  // 2. Dynamic Resize Synchronization (Pro Max 4.1 Optimizer)
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const observer = new ResizeObserver(async (entries) => {
+      const entry = entries[0];
+      if (entry && webviewRef.current) {
+        const { x, y, width, height } = entry.target.getBoundingClientRect();
+        try {
+          // Native Webview bounds must be synced manually with DOM container
+          await webviewRef.current.setSize(new LogicalSize(Math.round(width), Math.round(height)));
+          await webviewRef.current.setPosition(new LogicalPosition(Math.round(x), Math.round(y)));
+        } catch (e) {
+          // Webview might be closing or hidden during resize
+        }
+      }
+    });
+
+    observer.observe(containerRef.current);
+    
+    // Security Audit Log
+    if (url) {
+      console.info(`[Pro Max Security] Native Webview loading external domain. Source: ${new URL(url).hostname}`);
+    }
+
+    return () => observer.disconnect();
+  }, [url]);
+
+  // Re-create when URL changes or Component Unmounts
   useEffect(() => {
     return () => {
-      // Unmount complete destruction
       if (webviewRef.current) {
         webviewRef.current.close().catch(console.error);
         webviewRef.current = null;
