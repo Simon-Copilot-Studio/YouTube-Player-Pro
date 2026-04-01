@@ -6,6 +6,7 @@ import { Player } from "./components/Player";
 import { Menu } from "./components/Menu";
 import { TerminalCamouflage } from "./components/TerminalCamouflage";
 import { ContextMenu } from "./components/ContextMenu";
+import { UniversalPlayer } from "./components/UniversalPlayer";
 
 // Custom Hooks (SRP Implementation)
 import { useWindowState } from "./hooks/useWindowState";
@@ -38,6 +39,10 @@ function App() {
   const [isNativeMode, setIsNativeMode] = useState<boolean>(false); // New Mode
   const [player, setPlayer] = useState<any>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number, y: number } | null>(null);
+
+  // Pro Max 3.0 Engine State
+  const [engineType, setEngineType] = useState<'youtube' | 'universal' | null>(null);
+  const [universalSrc, setUniversalSrc] = useState<string>("");
 
   // Sync Menu Opacity to CSS Variable
   useEffect(() => {
@@ -86,25 +91,66 @@ function App() {
     setShowTitlebar
   });
 
-  // 5. URL Parsing Service
-  const parseYouTubeId = useCallback((targetUrl: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
-    const match = targetUrl.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+  // 5. Advanced Universal Media Parser
+  const parseMediaUrl = useCallback((targetUrl: string) => {
+    if (!targetUrl) return { type: null, src: '' };
+    
+    // Rule 1. YouTube
+    const ytRegExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const ytMatch = targetUrl.match(ytRegExp);
+    if (ytMatch && ytMatch[2].length === 11) {
+      return { type: 'youtube' as const, src: ytMatch[2] };
+    }
+
+    // Rule 2. TikTok (Convert to embed if possible)
+    const ttRegExp = /tiktok\.com\/@.*\/video\/(\d+)/;
+    const ttMatch = targetUrl.match(ttRegExp);
+    if (ttMatch && ttMatch[1]) {
+      // Force native mode for interactive tiktok embed
+      return { type: 'universal' as const, src: `https://www.tiktok.com/embed/v2/${ttMatch[1]}` };
+    }
+
+    // Rule 3. Instagram Reels/Posts
+    const igRegExp = /(instagram\.com\/(p|reel)\/[\w-]+)/;
+    const igMatch = targetUrl.match(igRegExp);
+    if (igMatch && igMatch[1]) {
+      return { type: 'universal' as const, src: `https://${igMatch[1]}/embed` };
+    }
+
+    // Rule 4. Generic URLs (Movies, Sites, etc)
+    if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
+      return { type: 'universal' as const, src: targetUrl };
+    }
+
+    return { type: null, src: '' };
   }, []);
 
   const handlePlay = useCallback(() => {
-    const id = parseYouTubeId(url);
-    if (id) {
-      if (id === currentVideoId) player?.playVideo();
-      else setCurrentVideoId(id);
+    const parsed = parseMediaUrl(url);
+    if (parsed.type === 'youtube') {
+      if (parsed.src === currentVideoId) player?.playVideo?.();
+      else {
+        setCurrentVideoId(parsed.src);
+        setEngineType('youtube');
+      }
+    } else if (parsed.type === 'universal') {
+      setUniversalSrc(parsed.src);
+      setEngineType('universal');
+      setIsNativeMode(true); // Force Native Mode for third-party sites
     }
-  }, [url, currentVideoId, player, parseYouTubeId]);
+  }, [url, currentVideoId, player, parseMediaUrl]);
 
   // Initial URL load
   useEffect(() => {
-    const id = parseYouTubeId(url);
-    if (id) setCurrentVideoId(id);
+    const parsed = parseMediaUrl(url);
+    if (parsed.type === 'youtube') {
+      setCurrentVideoId(parsed.src);
+      setEngineType('youtube');
+    } else if (parsed.type === 'universal') {
+      setUniversalSrc(parsed.src);
+      setEngineType('universal');
+      setIsNativeMode(true);
+    }
   }, []);
 
   const handleContextMenu = (e: React.MouseEvent) => {
@@ -134,16 +180,22 @@ function App() {
           filter: `brightness(${isCamouflaged ? 1 : brightness / 100})`,
         }}
       >
-        {/* Render Layer: Player vs Camouflage */}
+        {/* Render Layer: Hybrid Dispatcher (Player vs Universal vs Camouflage) */}
         <div style={{ display: isCamouflaged ? 'none' : 'block', width: '100%', height: '100%' }}>
-          {currentVideoId && (
+          {engineType === 'youtube' && currentVideoId && (
             <Player 
               videoId={currentVideoId} 
               onPlayerReady={setPlayer} 
               showSubtitles={showSubtitles} 
               subtitleSize={100} 
               playbackRate={playbackRate}
-              isNativeMode={isNativeMode} // Passing new mode
+              isNativeMode={isNativeMode}
+            />
+          )}
+          {engineType === 'universal' && universalSrc && (
+            <UniversalPlayer 
+              url={universalSrc}
+              isCamouflaged={isCamouflaged}
             />
           )}
         </div>

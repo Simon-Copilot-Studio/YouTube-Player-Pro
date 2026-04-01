@@ -517,6 +517,25 @@ input[type="range"]::-webkit-slider-thumb {
 }
 
 
+/* Pro Max 3.0: Universal Player Styles */
+.universal-player-wrapper {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #000;
+  z-index: 5;
+}
+
+.universal-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background-color: transparent;
+}
+
+
 
 
 
