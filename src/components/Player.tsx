@@ -56,12 +56,13 @@ export function Player({ videoId, onPlayerReady, showSubtitles, playbackRate, is
       },
       events: {
         onReady: (event: any) => {
+          // Dynamic setting without needing to re-init
           event.target.setPlaybackRate(playbackRate);
           onPlayerReady?.(event.target);
         },
       },
     });
-  }, [videoId, onPlayerReady, playbackRate, showSubtitles]);
+  }, [videoId, onPlayerReady]); // Decoupled playbackRate/showSubtitles from init
 
   useEffect(() => {
     if (!window.YT) {

@@ -65,6 +65,15 @@ function App() {
     setIsNativeMode(prev => !prev);
   }, []);
 
+  // 5. Global Click Listener (Hide Context Menu)
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      if (contextMenu) setContextMenu(null);
+    };
+    window.addEventListener('click', handleGlobalClick);
+    return () => window.removeEventListener('click', handleGlobalClick);
+  }, [contextMenu]);
+
   // 4. Keyboard Shortcuts Hook
   useKeyboardManager({
     toggleCamouflage,
@@ -100,6 +109,7 @@ function App() {
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation(); // Prevents global click listener from closing it immediately
     if (isCamouflaged) return;
     setContextMenu({ x: e.clientX, y: e.clientY });
   };
