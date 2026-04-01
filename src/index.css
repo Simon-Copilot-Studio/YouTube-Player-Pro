@@ -81,30 +81,39 @@ body {
 .menu-inner-scroll::-webkit-scrollbar { width: 4px; }
 .menu-inner-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
 
-/* Action Grid (Play/Stop) */
-.action-grid {
+/* Action Grid (Play/Pause/Stop) */
+.action-grid-three {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  grid-template-columns: 1fr 0.9fr 1fr; /* Pause is slightly narrower for visual balance */
+  gap: 8px;
   margin-top: 16px;
 }
 
 .action-card {
   display: flex;
+  flex-direction: column; /* Icon above text for the 3-column look */
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 14px;
+  gap: 6px;
+  padding: 12px 6px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.05);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   font-weight: 800;
-  font-size: 13px;
+  font-size: 10px; /* Slightly smaller text for 3-col */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
+
+.action-card svg { margin-bottom: 2px; }
 
 .action-card.play { background: rgba(16, 185, 129, 0.1); color: #10b981; }
 .action-card.play:hover { background: #10b981; color: white; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); transform: translateY(-2px); }
+
+.action-card.pause { background: rgba(99, 102, 241, 0.1); color: #818cf8; }
+.action-card.pause:hover { background: #6366f1; color: white; box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); transform: translateY(-2px); }
+
 .action-card.stop { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 .action-card.stop:hover { background: #ef4444; color: white; box-shadow: 0 0 20px rgba(239, 68, 68, 0.4); transform: translateY(-2px); }
 

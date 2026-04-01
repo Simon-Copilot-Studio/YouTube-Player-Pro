@@ -37,7 +37,7 @@ function App() {
     for (const [key, val] of Object.entries(state)) { localStorage.setItem(`yt-${key}`, JSON.stringify(val)); }
   }, [url, transparency, brightness, aspectRatio, showSubtitles, subtitleSize, playbackRate, showTitlebar]);
 
-  // Window size
+  // Window size memory
   useEffect(() => {
     const appWindow = getCurrentWindow();
     const savedWidth = localStorage.getItem("win-width");
@@ -53,7 +53,7 @@ function App() {
     return () => clearInterval(resizeInterval);
   }, []);
 
-  // Native resize
+  // Native resize logic
   useEffect(() => {
     if (isInitialLoad.current) { isInitialLoad.current = false; return; }
     const triggerResize = async () => {
@@ -66,19 +66,12 @@ function App() {
     triggerResize();
   }, [aspectRatio]);
 
-  // Boss Key: Toggle Camouflage with Seamless Resume
   const toggleCamouflage = useCallback(() => {
     setIsCamouflaged(prev => {
       const nextState = !prev;
       if (player && player.pauseVideo && player.playVideo) {
-        if (nextState) {
-          player.pauseVideo();
-          player.mute();
-        } else {
-          // SEAMLESS RESUME: Because player is kept in memory (display: none), we can play instantly
-          player.unMute();
-          player.playVideo();
-        }
+        if (nextState) { player.pauseVideo(); player.mute(); }
+        else { player.unMute(); player.playVideo(); }
       }
       return nextState;
     });
@@ -107,13 +100,7 @@ function App() {
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
     const match = url.match(regExp);
     const id = (match && match[2].length === 11) ? match[2] : null;
-    if (id) {
-      if (id === currentVideoId) {
-        player?.playVideo();
-      } else {
-        setCurrentVideoId(id);
-      }
-    }
+    if (id) { if (id === currentVideoId) { player?.playVideo(); } else { setCurrentVideoId(id); } }
   };
 
   useEffect(() => {
@@ -137,7 +124,6 @@ function App() {
         filter: `brightness(${isCamouflaged ? 1 : brightness / 100})`,
         flex: 1, position: 'relative', background: '#000'
       }}>
-        {/* SEAMLESS FIX: Move visibility logic into a wrapper instead of unmounting the component */}
         <div style={{ display: isCamouflaged ? 'none' : 'block', width: '100%', height: '100%' }}>
           {currentVideoId && (
             <Player 
@@ -156,7 +142,7 @@ function App() {
             brightness={brightness} setBrightness={setBrightness} aspectRatio={aspectRatio} setAspectRatio={setAspectRatio}
             showSubtitles={showSubtitles} setShowSubtitles={setShowSubtitles} subtitleSize={subtitleSize} setSubtitleSize={setSubtitleSize}
             playbackRate={playbackRate} setPlaybackRate={setPlaybackRate} showTitlebar={showTitlebar} setShowTitlebar={setShowTitlebar}
-            onPlay={handlePlay} onStop={() => player?.stopVideo()}
+            onPlay={handlePlay} onPause={() => player?.pauseVideo()} onStop={() => player?.stopVideo()}
           />
         )}
 

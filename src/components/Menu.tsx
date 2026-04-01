@@ -20,6 +20,7 @@ interface MenuProps {
   showTitlebar: boolean;
   setShowTitlebar: (val: boolean) => void;
   onPlay: () => void;
+  onPause: () => void;
   onStop: () => void;
 }
 
@@ -33,7 +34,7 @@ export function Menu({
   subtitleSize, setSubtitleSize,
   playbackRate, setPlaybackRate,
   showTitlebar, setShowTitlebar,
-  onPlay, onStop
+  onPlay, onPause, onStop
 }: MenuProps) {
   
   const ratios = [
@@ -54,7 +55,6 @@ export function Menu({
           <div className="menu-header">Pro Max Control</div>
           
           <div className="menu-section">
-            {/* YouTube Link Section */}
             <div className="setting-item">
               <label className="setting-label">Source URL</label>
               <div className="url-group-modern">
@@ -65,13 +65,17 @@ export function Menu({
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
                 />
-                <div className="action-grid">
+                <div className="action-grid-three">
                   <button className="action-card play" onClick={() => { onPlay(); onClose(); }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                     <span>PLAY</span>
                   </button>
+                  <button className="action-card pause" onClick={() => { onPause(); onClose(); }}>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    <span>PAUSE</span>
+                  </button>
                   <button className="action-card stop" onClick={() => { onStop(); onClose(); }}>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h12v12H6z"/></svg>
                     <span>STOP</span>
                   </button>
                 </div>
@@ -80,7 +84,6 @@ export function Menu({
 
             <hr className="divider" />
 
-            {/* Quick Toggles */}
             <div className="toggle-row">
               <div className="setting-item compact">
                 <span className="setting-label">Title Bar</span>
@@ -102,7 +105,6 @@ export function Menu({
               </div>
             </div>
 
-            {/* Visual Controls */}
             <div className="setting-item">
               <div className="setting-top">
                 <span className="setting-label">Transparency</span>
@@ -123,7 +125,6 @@ export function Menu({
               </div>
             </div>
 
-            {/* Selection Groups */}
             <div className="setting-item">
               <span className="setting-label">Playback Performance</span>
               <div className="chip-group">
