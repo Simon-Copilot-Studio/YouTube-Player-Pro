@@ -117,7 +117,16 @@ function App() {
       return { type: 'universal' as const, src: `https://${igMatch[1]}/embed` };
     }
 
-    // Rule 4. Generic URLs (Movies, Sites, etc)
+    // Rule 4. MissAV (Clean Embed Optimization for the ultimate "little happiness")
+    // e.g., https://missav.live/oretd-933 -> https://missav.live/embed/oretd-933
+    const missavRegExp = /missav\.(com|live|ws|ai)\/(?:en\/)?([a-zA-Z0-9-]+)/;
+    const missavMatch = targetUrl.match(missavRegExp);
+    if (missavMatch && missavMatch[2] !== "embed" && missavMatch[2] !== "") {
+      // Return a 100% ad-free video player framing URL
+      return { type: 'universal' as const, src: `https://missav.${missavMatch[1]}/embed/${missavMatch[2]}` };
+    }
+
+    // Rule 5. Generic URLs (Movies, Sites, etc)
     if (targetUrl.startsWith('http://') || targetUrl.startsWith('https://')) {
       return { type: 'universal' as const, src: targetUrl };
     }
