@@ -171,17 +171,20 @@ function App() {
           />
         )}
 
-        {/* Global Context Menu */}
+        {/* Global Context Menu & Backdrop */}
         {contextMenu && (
-          <ContextMenu 
-            x={contextMenu.x} y={contextMenu.y} 
-            onClose={() => setContextMenu(null)}
-            onToggleMenu={() => setIsMenuOpen(!isMenuOpen)} 
-            onToggleCamouflage={toggleCamouflage}
-            player={player} 
-            onPlay={handlePlay} 
-            onStop={() => player?.stopVideo()}
-          />
+          <>
+            <div className="context-menu-backdrop" onClick={() => setContextMenu(null)} />
+            <ContextMenu 
+              x={contextMenu.x} y={contextMenu.y} 
+              onClose={() => setContextMenu(null)}
+              onToggleMenu={() => setIsMenuOpen(!isMenuOpen)} 
+              onToggleCamouflage={toggleCamouflage}
+              player={player} 
+              onPlay={handlePlay} 
+              onStop={() => player?.stopVideo()}
+            />
+          </>
         )}
       </main>
     </div>

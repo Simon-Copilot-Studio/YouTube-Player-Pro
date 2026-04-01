@@ -64,6 +64,15 @@ body {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* New: Context Menu Backdrop to capture all clicks for auto-hide */
+.context-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1999; /* Just below context menu (2000) */
+  background: transparent;
+  pointer-events: auto;
+}
+
 .menu-item { padding: 10px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 600; color: #e2e8f0; transition: all 0.2s; }
 .menu-item:hover { background: rgba(255, 255, 255, 0.08); color: white; }
 .menu-item.danger { color: #f87171; }
